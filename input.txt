@@ -1,0 +1,8 @@
+CODE{
+##note
+@ int num = 5;
+@ string = "string";
+print(num.MEM);
+@ file f = "testfile.txt";
+string = file_readToBuffer(f);
+}EOF
