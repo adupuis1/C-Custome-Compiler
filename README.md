@@ -1,2 +1,2 @@
-Work in progress
-doing this to learn c
+Work in progress.
+Doing this to learn c
