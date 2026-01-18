@@ -1,3 +1,5 @@
+#compiled object files
+*.o
 #Vim swap files
 *.swp
 *.swo
