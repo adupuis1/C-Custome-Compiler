@@ -4,13 +4,15 @@
 #include <ctype.h>
 #include "utils/custom_io.h"
 #include "utils/file_mgmt.h"
-
+#include "utils/lexer_config.h"
 
 typedef enum {
 	Digit,
 	Letter,
 	Operator,
 	Punctuation,
+	Keyword,
+	Identifier,
 	endOfFile
 } tokenType;
 
@@ -34,7 +36,7 @@ typedef struct {
 //	TOKENIZER
 void tokenizer(char *input);
 void PROCESS_wordToken(char *word);
-
+bool isoperator(char c);
 //MAIN
 int main(){
 
@@ -57,15 +59,27 @@ int main(){
 
 //FUNCTIONS
 //	TOKENIZATION
+//
+void PROCESS_wordToken(char *word){
+	if(iskeyword(word)){
+		printf("KEYWORD: %s 	", word);
+		
+	} else {
+        	printf("IDENTIFIER: %s     ", word);
+		
+	}
+}
+
 void tokenizer(char *input){
 	int pos = 0;
 	int line = 1;
-
+	int start;
+	int length;
 	header("STARTING TOKENIZATION");
 	while(input[pos] != '\0'){
 		char current = input[pos]; //why no pointer (char *current)!!
-		char lookAhead = input[pos+1];
-	
+		start = pos;
+		length = 0;
 		if(current == '\n'){
 			line++;
 			pos++;
@@ -78,39 +92,140 @@ void tokenizer(char *input){
 		}
 
 		if(isdigit(current)){
-			pos++;
-			message("integer found", 0);
+			
+			while(isdigit(input[pos])){
+				pos++;
+			}
+			length = pos - start;
+			char *numString = malloc(length + 1);
+			strncpy(numString, &input[start], length);
+			numString[length] = '\0';
+			int val = atoi(numString);
+			printf("INT_LITERAL: %d 	", val);
+			printloc(pos, line);
+			free(numString);
 			continue;
 		}
 //			1. starts with a char
 		if(isalpha(current)){
-			int start = pos;
+			
 
 //			2. if is a num or char pos++
-			while(isalpha(input[pos])){
+			while(isalpha(input[pos]) || input[pos] == '_'){
 				pos++;
 			}
 //			3. calculate length
-			int length = pos - start;
+			length = pos - start;
 
 //			4. extract word
 			char *word = malloc(length+1);
 			strncpy(word, &input[start], length);
 			word[length] = '\0';
-
+			if(strncmp(word,"EOF",length) == 0){
+				printf("%s\n", word);
+				free(word);
+				break;
+			}
 			PROCESS_wordToken(word);
+			printloc(pos, line);
 			free(word);
 			continue;
+		}
+		if(isoperator(current)){
+			while(isoperator(input[pos])){
+				pos++;
+			}
+			length = pos - start;
+			char *operator = malloc(length+1);
+			strncpy(operator, &input[start], length);
+			operator[length] = '\0';
+			printf("OPERATOR: %s	", operator);
+			printloc(pos, line);
+			free(operator);
+			continue;
+
+		}
+		if(current == '@'){
+			printf("PUNCTUATOR: @	");
+			printloc(pos, line);
+			pos++;
+			continue;
+		}
+		if(current == '{'){
+			printf("PUNCTUATOR: {	");
+			printloc(pos, line);
+			pos++;
+			continue;	
+		}
+	        if(current == '"'){
+			
+			pos++;
+			start = pos;
+			while(input[pos] != '"'){
+				pos++;
+			}
+			length = (pos) - start;
+			char *stringLiteral = malloc(length+1);
+			strncpy(stringLiteral, &input[start], length);
+			stringLiteral[length] = '\0';
+			printf("STRING_LITERAL: %s	", stringLiteral);
+			printloc(pos, line);
+			free(stringLiteral);
+			pos++;
+			continue;
+		}
+		if(current == '#'){
+			if(input[pos+1] != NULL && input[pos+1] == '#'){
+				pos++;
+				start = pos+1;
+				while(input[pos] != '\n'){
+					pos++;	
+				}
+				length = pos - start;
+				char *comment = malloc(length+1);
+				strncpy(comment, &input[start], length);
+				comment[length] = '\0';
+				printf("COMMENT: %s	", comment);
+				printloc(pos, line);
+				free(comment);
+				continue;
+			}
+		}
+		if(current == ';'){
+			printf("PUNCTUATOR: ;	");
+			printloc(pos, line);
+			pos++;
+			continue;
 		}	
+		if(current == '}'){
+			printf("PUNCTUATOR: }	");
+			printloc(pos, line);
+			pos++;
+			continue;
+		}
+		if(current == '('){
+			printf("PUNCTUATOR: (	");
+			printloc(pos, line);
+                        pos++;
+                        continue;
+
+		}
+		if(current == ')'){
+                        printf("PUNCTUATOR: )	");
+			printloc(pos, line);
+                        pos++;
+                        continue;
+
+                }
+	
 		else {
 			pos++;
-			message("undefined", 1);
+			printf("undefined	");
+			printloc(pos, line);
 			continue;
 		}
 	}
-	message("finished tokenization", 1);
+	header("finished tokenization");
 }
-
-
 
 

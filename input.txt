@@ -1,6 +1,7 @@
 CODE{
 ##note
 @ int num = 5;
+@ int num = 105;
 @ string = "string";
 print(num.MEM);
 @ file f = "testfile.txt";

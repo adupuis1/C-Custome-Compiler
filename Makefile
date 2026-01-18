@@ -1,8 +1,8 @@
 CC = gcc
 CFLAGS = -Wall -I./utils
-TARGET = my_compiler
+TARGET = compiler
 
-SRCS = compiler.c utils/custom_io.c utils/file_mgmt.c
+SRCS = compiler.c utils/custom_io.c utils/file_mgmt.c utils/lexer_config.c
 
 all:
 	$(CC) $(CFLAGS) $(SRCS) -o $(TARGET)

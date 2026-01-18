@@ -60,7 +60,4 @@ char* fileToBuffer(const char *fileName){
         return buffer;
 
 }
-void PROCESS_wordToken(char *word){
-        printf("WORD FOUND: %s\n", word);
-}
 

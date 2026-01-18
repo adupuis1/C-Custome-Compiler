@@ -37,4 +37,6 @@ void customError(const char *custom_message){
                         //"stderr", unbuffered output stream reserved for errors, prints directly
         fprintf(stderr, "%sERROR: %s%s", RED, custom_message, DEFAULT);
 }
-
+void printloc(int pos, int line){
+	printf("pos: %d, line: %d\n", pos, line);
+}
