@@ -2,18 +2,30 @@
 #include "custom_io.h"
 
 //FILE FUNCTIONS
+FILE * current_file = NULL;
+
+
+void setFile(char * fileName){
+
+	current_file = fopen(fileName, "r");
+	if (current_file == NULL){
+		printf("failed to set file\n");
+	} else {
+		printf("file set\n");
+	}
+}
 //      GET FILE SIZE
-int sizeOfFile(FILE *file){
-        if(file == NULL) return 0;
+int sizeOfFile(){
+        if(current_file == NULL) return 0;
 
         //      1. move to very last byte in file
-        fseek(file, 0L, SEEK_END);
+        fseek(current_file, 0L, SEEK_END);
 
         //      2. check the postion ftell(file): how many bytes away from start
-        int size = (int)ftell(file);
+        int size = (int)ftell(current_file);
 
         //      3. reset cursor to start of file so other functions like fread  can read it
-        rewind(file);
+        rewind(current_file);
         return size;
 }
 //      CREATE AN ARRAY SIZE OF FILESIZE
@@ -40,13 +52,13 @@ char* quickToArray(FILE *file){
         return buffer;
 }
 
-char* fileToBuffer(const char *fileName){
+char* fileToBuffer(){
 
-        FILE *file = fopen(fileName, "r");
-        if (file==NULL) return NULL;
+        
+        if (current_file==NULL) return NULL;
 
 
-        char *buffer = quickToArray(file);
+        char *buffer = quickToArray(current_file);
         if(buffer != NULL){
                 message("SUCCESS", 0);
                 message("buffer stream created", 1);
@@ -56,8 +68,12 @@ char* fileToBuffer(const char *fileName){
 
 
 
-        fclose(file);
+        fclose(current_file);
         return buffer;
 
 }
 
+FILE * returnFile(FILE *file){
+
+	return current_file;
+}

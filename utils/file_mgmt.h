@@ -6,10 +6,12 @@
 #include <stdlib.h>
 
 //      FILE HANDLING
-int sizeOfFile(FILE *file);
+void setFile(char * fileName);
+FILE* getFile();
+int sizeOfFile();
 char* toArray(FILE *file, int filesize);
 char* quicToArray(FILE *file);
-char* fileToBuffer(const char *filename);
+char* fileToBuffer();
 
 
 #endif

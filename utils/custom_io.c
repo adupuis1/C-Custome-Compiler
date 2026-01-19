@@ -22,10 +22,19 @@ void header(const char *text){
 }
 void message(const char *custom_message, int blue){
         if(blue == 0){
-                printf("\n%s%s%s\n", BLUE, custom_message, DEFAULT);
+                printf("%s%s%s\n", BLUE, custom_message, DEFAULT);
         } else {
                 printf("%s\n", custom_message);
         }
+}
+
+void blueText(char * text){
+	printf("%s%s%s", BLUE, text, DEFAULT);
+}
+
+void blueInt(int num){
+	printf("%s%d%s", BLUE, num, DEFAULT);
+
 }
 
 //              custom error, const = Read-Only char

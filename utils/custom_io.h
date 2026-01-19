@@ -17,5 +17,6 @@ void header(const char *text);
 void message(const char *custom_message, int blue);
 void customError(const char *custom_message);
 void printloc(int pos, int line);
-
+void blueText(char * text);
+void blueInt(int num);
 #endif

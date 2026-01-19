@@ -6,43 +6,23 @@
 #include "utils/file_mgmt.h"
 #include "utils/lexer_config.h"
 
-typedef enum {
-	Digit,
-	Letter,
-	Operator,
-	Punctuation,
-	Keyword,
-	Identifier,
-	endOfFile
-} tokenType;
-
-typedef struct {
-	/*lexeme: actaul characters: e.g tokenType: Digit, lexeme: 566 */
-	char *lexeme;
-	tokenType type;
-	int line;
-
-} Token;
-
-typedef struct {
-	Token *tokens;	//token array
-	int count;	//amount of tokens
-	int capacity; //memory allocated
-} TokenList;
-
 //------------------------------------------
 //PROTOTYPES
 //------------------------------------------
 //	TOKENIZER
 void tokenizer(char *input);
-void PROCESS_wordToken(char *word);
+void PROCESS_wordToken(int ppos, int line, char *word);
 bool isoperator(char c);
+
+
 //MAIN
 int main(){
-
+	
+	
 	header("COMPILER made by Anatole Dupuis");
-
-	char *charStream = fileToBuffer("input.txt");
+	setFile("files/input.txt");
+	newEmptyTokenList();	
+	char *charStream = fileToBuffer();
 	if(charStream != NULL){
 		message("SUCCESS", 0);
 		message("char stream created", 1);
@@ -50,7 +30,7 @@ int main(){
 		tokenizer(charStream);
 		
 	} else {
-		customError("failed");
+		customError("failed\n");
 	}
 	
 
@@ -60,19 +40,24 @@ int main(){
 //FUNCTIONS
 //	TOKENIZATION
 //
-void PROCESS_wordToken(char *word){
+void PROCESS_wordToken(int ppos, int line, char *word){
 	if(iskeyword(word)){
-		printf("KEYWORD: %s 	", word);
+		
+		add_token(ppos, KEYWORD, line, word);
+
 		
 	} else {
-        	printf("IDENTIFIER: %s     ", word);
+		add_token(ppos, KEYWORD, line, word);
+        	
 		
 	}
 }
 
 void tokenizer(char *input){
+
 	int pos = 0;
 	int line = 1;
+	int ppos =0;
 	int start;
 	int length;
 	header("STARTING TOKENIZATION");
@@ -101,8 +86,10 @@ void tokenizer(char *input){
 			strncpy(numString, &input[start], length);
 			numString[length] = '\0';
 			int val = atoi(numString);
-			printf("INT_LITERAL: %d 	", val);
-			printloc(pos, line);
+			printf("INT_LITERAL: ", val);
+//void add_intToken(int pos, TokenType type, char* lexeme, int line, int value);
+			add_intToken(ppos, LITERAL_INT, numString, line, val);
+			ppos += 1;
 			free(numString);
 			continue;
 		}
@@ -121,13 +108,22 @@ void tokenizer(char *input){
 			char *word = malloc(length+1);
 			strncpy(word, &input[start], length);
 			word[length] = '\0';
+
 			if(strncmp(word,"EOF",length) == 0){
 				printf("%s\n", word);
 				free(word);
 				break;
 			}
-			PROCESS_wordToken(word);
-			printloc(pos, line);
+			// we must check if word is either
+			//		 identifier: User-defined names given to program elements like variables, functions, classes, etc. (e.g., age, calculateSum)
+			//		 keyword: Reserved words with predefined, special meanings in the programming language (e.g., if, while, return, class). 	
+			if(iskeyword(word)){
+				add_token(ppos, KEYWORD, line, word);
+			} else{
+				add_token(ppos, IDENTIFIER, line, word);
+
+			}
+			ppos += 1;
 			free(word);
 			continue;
 		}
@@ -139,8 +135,7 @@ void tokenizer(char *input){
 			char *operator = malloc(length+1);
 			strncpy(operator, &input[start], length);
 			operator[length] = '\0';
-			printf("OPERATOR: %s	", operator);
-			printloc(pos, line);
+			add_token(ppos, OPERATOR, line, operator);
 			free(operator);
 			continue;
 
@@ -168,8 +163,7 @@ void tokenizer(char *input){
 			char *stringLiteral = malloc(length+1);
 			strncpy(stringLiteral, &input[start], length);
 			stringLiteral[length] = '\0';
-			printf("STRING_LITERAL: %s	", stringLiteral);
-			printloc(pos, line);
+			add_token(ppos, LITERAL_STRING, line, stringLiteral);
 			free(stringLiteral);
 			pos++;
 			continue;
