@@ -1,6 +1,7 @@
 #include "lexer_config.h"
 #include <string.h>
 #include <stdlib.h>
+#include <ctype.h>
 #include "file_mgmt.h"
 
 // 1. Define the array locally in this file
@@ -13,16 +14,8 @@ static const char* KEYWORDS[] = {"int", "string", "file", "print"};
 
 // global current TokenList
 TokenList* currentTokenList = NULL;
+char * charStream_tokenList = NULL;
 
-void print_intToken(Token * token){
-	printf("LITERAL_INT:    ");
-        blueInt(token->data.int_val);
-        printf("        |       ");
-	printloc(token->pos, token->line);
-	printf("\n");
-       
-	
-}
 void print_Token(Token * token){
 	
 	char * type = "no type";
@@ -68,6 +61,11 @@ bool isoperator(char c){
         return strchr("+-/!=&<>|%.", c) != NULL;
 }
 
+
+bool ispunctuator(char c){
+
+	return strchr(";@{}()", c) != NULL;
+}
 bool iskeyword(char * word){
         for(int i = 0; i < NUM_OF_KEYWORDS; i++){
 		if(strcmp(word, KEYWORDS[i]) == 0){
@@ -109,7 +107,7 @@ void add_intToken(int pos, TokenType type, char* lexeme, int line, int value){
 	newToken->data.int_val = value;
 	newToken->data.string_val = newToken->lexeme;
 	currentTokenList->count += 1;
-	print_intToken(newToken);
+	print_Token(newToken);
 
 
 }
@@ -130,6 +128,171 @@ void add_token(int pos, TokenType type, int line, char * value){
 	print_Token(newToken);
 
 }
+
+//FUNCTIONS
+//	TOKENIZATION
+//
+void tokenizer(char *input){
+
+	int pos = 0;
+	int line = 1;
+	int ppos =0;
+	int start;
+	int length;
+	header("STARTING TOKENIZATION");
+	while(input[pos] != '\0'){
+		char current = input[pos]; //why no pointer (char *current)!!
+		start = pos;
+		length = 0;
+		if(current == '\n'){
+			line++;
+			pos++;
+			continue;
+		}
+
+		if(isspace(current)){
+			pos++;
+			continue;
+		}
+
+		if(isdigit(current)){
+			
+			while(isdigit(input[pos])){
+				pos++;
+			}
+			length = pos - start;
+			char *numString = malloc(length + 1);
+			strncpy(numString, &input[start], length);
+			numString[length] = '\0';
+			int val = atoi(numString);
+			add_intToken(ppos, LITERAL_INT, numString, line, val);
+			ppos += 1;
+			free(numString);
+			continue;
+		}
+//			1. starts with a char
+		if(isalpha(current)){
+			
+
+//			2. if is a num or char pos++
+			while(isalpha(input[pos]) || input[pos] == '_'){
+				pos++;
+			}
+//			3. calculate length
+			length = pos - start;
+
+//			4. extract word
+			char *word = malloc(length+1);
+			strncpy(word, &input[start], length);
+			word[length] = '\0';
+
+			if(strncmp(word,"EOF",length) == 0){
+				printf("%s\n", word);
+				free(word);
+				break;
+			}
+			// we must check if word is either
+			//		 identifier: User-defined names given to program elements like variables, functions, classes, etc. (e.g., age, calculateSum)
+			//		 keyword: Reserved words with predefined, special meanings in the programming language (e.g., if, while, return, class). 	
+			if(iskeyword(word)){
+				add_token(ppos, KEYWORD, line, word);
+			} else{
+				add_token(ppos, IDENTIFIER, line, word);
+
+			}
+			ppos += 1;
+			free(word);
+			continue;
+		}
+		if(isoperator(current)){
+			while(isoperator(input[pos])){
+				pos++;
+			}
+			length = pos - start;
+			char *operator = malloc(length+1);
+			strncpy(operator, &input[start], length);
+			operator[length] = '\0';
+			add_token(ppos, OPERATOR, line, operator);
+			free(operator);
+			ppos ++;
+			continue;
+
+		}
+ 		if(ispunctuator(current)){
+                        char * punctuator = malloc(3);
+                        punctuator[0] = current;
+                        punctuator[1] = '\0';
+                        add_token(ppos, PUNCTUATOR, line, punctuator);
+                        free(punctuator);
+                        ppos++;
+		       	pos++;
+
+                        continue;
+                }
+
+	        if(current == '"'){
+			
+			pos++;
+			start = pos;
+			while(input[pos] != '"'){
+				pos++;
+			}
+			length = (pos) - start;
+			char *stringLiteral = malloc(length+1);
+			strncpy(stringLiteral, &input[start], length);
+			stringLiteral[length] = '\0';
+			add_token(ppos, LITERAL_STRING, line, stringLiteral);
+			free(stringLiteral);
+			pos++;
+			continue;
+		}
+		if(current == '#'){
+			if(input[pos+1] != NULL && input[pos+1] == '#'){
+				pos++;
+				start = pos+1;
+				while(input[pos] != '\n'){
+					pos++;	
+				}
+				length = pos - start;
+				char *comment = malloc(length+1);
+				strncpy(comment, &input[start], length);
+				comment[length] = '\0';
+				printf("COMMENT: %s	", comment);
+				printloc(pos, line);
+				free(comment);
+				continue;
+			}
+		}
+
+		else {
+			pos++;
+			printf("undefined	");
+			printloc(pos, line);
+			continue;
+		}
+	}
+	header("finished tokenization");
+}
+
+
+void tokenize(){
+	newEmptyTokenList();
+        charStream_tokenList = fileToBuffer();
+	if(charStream_tokenList != NULL){
+                message("SUCCESS", 0);
+                message("char stream created", 1);
+                //printf("%s", charStream);
+                tokenizer(charStream_tokenList);
+
+        } else {
+                customError("failed\n");
+        }
+
+}
+
+	
+
+
 
 
 

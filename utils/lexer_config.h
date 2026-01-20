@@ -37,16 +37,21 @@ typedef struct {
     int capacity;
 } TokenList;
 
-void print_intToken(Token * token);
+
 void print_Token(Token * token);
 
 bool isoperator(char c);
+bool ispunctuator(char c);
 bool iskeyword(char *word);
+
+
 void newEmptyTokenList();
 void setCurrentList(TokenList * newTokenList);
+
 void add_intToken(int pos, TokenType type, char* lexeme, int line, int value);
 void add_token(int pos, TokenType type, int line, char * value);
 
-
+void tokenizer(char * input);
+void tokenize();
 
 #endif
