@@ -37,7 +37,7 @@ typedef struct {
     int capacity;
 } TokenList;
 
-
+TokenList* get_token_list();
 void print_Token(Token * token);
 
 bool isoperator(char c);

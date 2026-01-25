@@ -5,7 +5,7 @@
 #include "utils/custom_io.h"
 #include "utils/file_mgmt.h"
 #include "utils/lexer_config.h"
-
+#include "utils/parser.h"
 //------------------------------------------
 //PROTOTYPES
 //------------------------------------------
@@ -22,6 +22,7 @@ int main(){
 	header("COMPILER made by Anatole Dupuis");
 	setFile("files/input.txt");
 	tokenize();
+	start_parsing();
 	
 	return 0;
 }

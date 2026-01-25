@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "file_mgmt.h"
+#include "custom_io.h"
 
 // 1. Define the array locally in this file
 static const char* KEYWORDS[] = {"int", "string", "file", "print"};
@@ -16,6 +17,11 @@ static const char* KEYWORDS[] = {"int", "string", "file", "print"};
 TokenList* currentTokenList = NULL;
 char * charStream_tokenList = NULL;
 
+
+TokenList* get_token_list(){
+
+	return currentTokenList;
+}
 void print_Token(Token * token){
 	
 	char * type = "no type";
@@ -120,10 +126,10 @@ void add_token(int pos, TokenType type, int line, char * value){
         }
         Token * newToken = &currentTokenList->tokens[pos];
         newToken->type = type;
-        newToken->lexeme = value;
+        newToken->lexeme = strdup(value);
         newToken->line = line;
         newToken->pos = pos;
-        newToken->data.string_val = value;
+        newToken->data.string_val = newToken->lexeme;
         currentTokenList->count += 1;
 	print_Token(newToken);
 
