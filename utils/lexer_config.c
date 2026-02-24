@@ -6,7 +6,7 @@
 #include "custom_io.h"
 
 // 1. Define the array locally in this file
-static const char* KEYWORDS[] = {"int", "string", "file", "print"};
+static const char* KEYWORDS[] = {"NEW","DB","TABLE","USE","ADD","REMOVE","GET","FIND","DUPLICATE","int", "string", "file", "print"};
 
 
 // 2. Use your #define here! It works perfectly in this scope.

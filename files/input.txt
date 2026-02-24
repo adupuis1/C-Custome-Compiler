@@ -1,9 +1,27 @@
-CODE{
-##note
-@ int num = 5;
-@ int num = 105;
-@ string = "string";
-print(num.MEM);
-@ file f = "testfile.txt";
-string = file_readToBuffer(f);
-}EOF
+CODE {
+    ## 1. Setup Structure
+    NEW DB db1;
+    USE db1;
+    
+    ## 2. Define Schema (Auto-ID implied)
+    NEW TABLE Users {
+        Int: id, 
+        String: name, 
+        Int: age
+    };
+    
+    ## 3. Enter Context
+    USE Users;
+    
+    ## 4. Add Data (ID is auto-generated, so we provide Name and Age)
+    ADD NEW {"Bob", 26};
+    ADD NEW {"Alice", 30};
+    ADD NEW {"Bob", 26};  ## Intentionally adding a duplicate for testing
+    
+    ## 5. Operations
+    GET id = 1;
+    FIND DUPLICATE;           ## Returns the second Bob
+    REMOVE DUPLICATE;         ## Removes the second Bob
+    
+    REMOVE id = 1;            ## Bye bye first Bob
+}
