@@ -45,11 +45,12 @@ Token* consume(TokenType expected_type, char* expected_lexeme);
 ASTNode* createNode(int node_type, Token* t, ASTNode* left, ASTNode* right);
 
 ASTNode* parse_literal();
-ASTNode* parse_statement();
 ASTNode* parse_block();
 
 ASTNode* parse_new();
 ASTNode* parse_use(); 
 ASTNode* parse_add();
+
+ASTNode* parse_statement();
 
 #endif
