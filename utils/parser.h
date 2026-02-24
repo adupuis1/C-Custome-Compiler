@@ -15,7 +15,7 @@ typedef struct ASTNode {
     		NODE_BINARY_EXPR,  // 5 + 10
     		NODE_FUNCTION_DECL,// void main() { ... }
    		NODE_VAR_DECL,     // int x;
-    		NODE_LITERAL       // Just a raw number
+    		NODE_LITERAL,       // Just a raw number
 		NODE_ITENTIFIER,
 		NODE_FUNC_CALL
  	}type;
