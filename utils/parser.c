@@ -1,5 +1,6 @@
 #include "parser.h"
 #include <stdlib.h>
+#include <string.h>
 #include "lexer_config.h"
 
 
@@ -33,15 +34,29 @@ Token* advance(){
 	current++;
 	return t;
 }
-Token* consume(TokenType expected_type, char* expected_lexeme){	
-	
-	Token * t = peek();
-	if(t->type == expected_type && strcmp(t->lexeme, expected_lexeme)){
-		printf("consumed: %s\n", expected_type);
-		return advance();
-	}
-	printf("Syntax error on line %d: Expected '%s' but found '%s'\n", t->line, expected_lexeme, t->lexeme);
-	exit(1);
+Token* consume(TokenType expected_type, char* expected_lexeme) {
+    Token* t = peek();
+
+    // 1. Check Type
+    if (t->type == expected_type) {
+        // 2. Check Lexeme (Only if expected_lexeme is NOT NULL)
+        if (expected_lexeme == NULL) {
+            // Wildcard match: We expected an IDENTIFIER, and we got one. Accepted.
+            return advance();
+        }
+        
+        // Strict match: We expected "db" and we got "db"
+        if (strcmp(t->lexeme, expected_lexeme) == 0) {
+            return advance();
+        }
+    }
+
+    // Error handling
+    printf("Syntax error on line %d: Expected '%s' but found '%s'\n", 
+           t->line, 
+           expected_lexeme ? expected_lexeme : "ANY_IDENTIFIER", // Handle NULL print
+           t->lexeme);
+    exit(1);
 }
 
 
@@ -56,10 +71,11 @@ ASTNode* createNode(int node_type, Token* t, ASTNode* left, ASTNode* right){
 	return node;
 
 }
+
 ASTNode* parse_literal(){
 	Token*t = peek();
 	
-	return t;
+	return createNode(NODE_LITERAL, t, NULL, NULL);
 }
 
 ASTNode* parse_block(){
@@ -93,7 +109,7 @@ ASTNode* parse_new() {
 	//the next token is the name e.g: db1/ users
 	//we treat the Name as the 'left' child 
 	Token* nameToken = peek();
-	ASTNode* nameNode = createNode(NODE_IDENTIFIER, nameToken, nameNode, NULL);
+	ASTNode* nameNode = createNode(NODE_IDENTIFIER, nameToken, NULL, NULL);
 	advance();
 	ASTNode* newNode = createNode(NODE_CMD_NEW, typeToken, nameNode, NULL);
 
@@ -168,7 +184,7 @@ ASTNode* parse_statement(){
         return createNode(NODE_CMD_GET, t, NULL, NULL); // t is "GET"
     }
 
-	// [PRESERVED] Your original test logic
+	
 	if(t->type == IDENTIFIER){
         // Only consume @ if it's actually there, otherwise it might be a variable name
         if (strcmp(t->lexeme, "@") == 0) { 
@@ -180,11 +196,9 @@ ASTNode* parse_statement(){
         return node;
 	}
     
-    // [PRESERVED] Handle literals
+    
     if (t->type == LITERAL_INT || t->type == LITERAL_STRING) {
-        ASTNode* node = createNode(NODE_LITERAL, t, NULL, NULL);
-        advance();
-        return node;
+        return parse_literal();
     }
     
     return NULL;

@@ -181,7 +181,7 @@ void tokenizer(char *input){
 			
 
 //			2. if is a num or char pos++
-			while(isalpha(input[pos]) || input[pos] == '_'){
+			while(isalnum(input[pos]) || input[pos] == '_'){
 				pos++;
 			}
 //			3. calculate length
